@@ -1,6 +1,6 @@
 import os
 import random
-from typing import List, Union
+from typing import List, Union, Optional
 import numpy as np
 import pandas as pd
 
@@ -8,6 +8,13 @@ import uvicorn
 from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+
+# Pydantic v2 compatibility
+try:
+    from pydantic import model_validator
+    PYDANTIC_V2 = True
+except ImportError:
+    PYDANTIC_V2 = False
 
 import tensorflow as tf
 from tensorflow.keras.models import load_model
@@ -22,9 +29,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-class RecognizeIngredientsRequest(BaseModel):
-    image: UploadFile
-
 class RecognizeIngredientsResponse(BaseModel):
     ingredients: List[str]
 
@@ -38,11 +42,14 @@ class Menu(BaseModel):
     ingredients: List[str]
     steps: List[str]
 
+    model_config = {"arbitrary_types_allowed": True}
+
 class SuggestMenusResponse(BaseModel):
     menus: List[Menu]
 
 # Load the machine learning model for ingredient recognition
-model = load_model('/path/model.h5')
+_BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+model = load_model(os.path.join(_BASE_DIR, 'path', 'model.h5'))
 
 def standard_response(status: str, message: str, data: Union[dict, list, None] = None):
     """
