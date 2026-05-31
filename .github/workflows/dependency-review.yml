@@ -6,6 +6,7 @@ on:
 
 permissions:
   contents: read
+  pull-requests: write
 
 jobs:
   dependency-review:
@@ -17,4 +18,7 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Review Dependencies
-        uses: actions/dependency-review-action@5b2d4b2672db3a7775de0b7305f884a44f51f478 # v4
+        uses: actions/dependency-review-action@da24556e9f6b9b516cf1c784b4e522b4f4e3e5e0 # v4.7.1
+        with:
+          fail-on-severity: high
+          deny-licenses: GPL-2.0, AGPL-3.0
